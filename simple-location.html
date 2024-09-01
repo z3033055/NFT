@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Location to Smart Contract using Kurtosis Geth Node</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.min.js" type="application/javascript"></script>
+</head>
+<body>
+    <button id="getLocationBtn">Get Location and Send to Contract</button>
+    <div id="message"></div> <!-- メッセージ表示用の要素 -->
+
+    <script>
+        document.getElementById("getLocationBtn").addEventListener("click", async function() {
+            const messageDiv = document.getElementById("message");
+            messageDiv.innerHTML = "Getting location...";
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function(position) {
+                    const latitude = position.coords.latitude.toFixed(4);
+                    const longitude = position.coords.longitude.toFixed(4);
+                    const location = `Latitude: ${latitude}°, Longitude: ${longitude}°`;
+
+                    console.log(location);
+                    messageDiv.innerHTML = `Location: ${location}`;
+
+                    try {
+                        // Kurtosisで立ち上げたGethノードに接続
+                        const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:60169"); // ここにKurtosisのGethノードのRPCエンドポイントを設定
+
+                        // プライベートキーでウォレットを作成
+                        const privateKey = "bcdf20249abf0ed6d944c0288fad489e33f66b3960d9e6229c1cd214ed3bbe31"; // ここにプライベートキーを設定
+                        const wallet = new ethers.Wallet(privateKey, provider);
+
+                        // スマートコントラクトのアドレスとABIを設定
+                        const contractAddress = "0x17435ccE3d1B4fA2e5f8A08eD921D57C6762A180";  // コントラクトのアドレス
+                        const contractABI = [ 
+                        
+                        {
+                            "inputs": [
+                              {
+                                "internalType": "string",
+                                "name": "_predefinedLocation",
+                                "type": "string"
+                              }
+                            ],
+                            "stateMutability": "nonpayable",
+                            "type": "constructor"
+                          },
+                          {
+                            "anonymous": false,
+                            "inputs": [
+                              {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                              },
+                              {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "approved",
+                                "type": "address"
+                              },
+                              {
+                                "indexed": true,
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "Approval",
+                            "type": "event"
+                          },
+                          {
+                            "anonymous": false,
+                            "inputs": [
+                              {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                              },
+                              {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "operator",
+                                "type": "address"
+                              },
+                              {
+                                "indexed": false,
+                                "internalType": "bool",
+                                "name": "approved",
+                                "type": "bool"
+                              }
+                            ],
+                            "name": "ApprovalForAll",
+                            "type": "event"
+                          },
+                          {
+                            "anonymous": false,
+                            "inputs": [
+                              {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "from",
+                                "type": "address"
+                              },
+                              {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "to",
+                                "type": "address"
+                              },
+                              {
+                                "indexed": true,
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "Transfer",
+                            "type": "event"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "to",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "approve",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                              }
+                            ],
+                            "name": "balanceOf",
+                            "outputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "",
+                                "type": "uint256"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "getApproved",
+                            "outputs": [
+                              {
+                                "internalType": "address",
+                                "name": "",
+                                "type": "address"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "address",
+                                "name": "operator",
+                                "type": "address"
+                              }
+                            ],
+                            "name": "isApprovedForAll",
+                            "outputs": [
+                              {
+                                "internalType": "bool",
+                                "name": "",
+                                "type": "bool"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "_timestamp",
+                                "type": "uint256"
+                              },
+                              {
+                                "internalType": "string",
+                                "name": "_location",
+                                "type": "string"
+                              }
+                            ],
+                            "name": "logAndMintNFT",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "logs",
+                            "outputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "timestamp",
+                                "type": "uint256"
+                              },
+                              {
+                                "internalType": "string",
+                                "name": "location",
+                                "type": "string"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [],
+                            "name": "name",
+                            "outputs": [
+                              {
+                                "internalType": "string",
+                                "name": "",
+                                "type": "string"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "ownerOf",
+                            "outputs": [
+                              {
+                                "internalType": "address",
+                                "name": "",
+                                "type": "address"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [],
+                            "name": "predefinedLocation",
+                            "outputs": [
+                              {
+                                "internalType": "string",
+                                "name": "",
+                                "type": "string"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "from",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "address",
+                                "name": "to",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "safeTransferFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "from",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "address",
+                                "name": "to",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              },
+                              {
+                                "internalType": "bytes",
+                                "name": "data",
+                                "type": "bytes"
+                              }
+                            ],
+                            "name": "safeTransferFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "operator",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "bool",
+                                "name": "approved",
+                                "type": "bool"
+                              }
+                            ],
+                            "name": "setApprovalForAll",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "bytes4",
+                                "name": "interfaceId",
+                                "type": "bytes4"
+                              }
+                            ],
+                            "name": "supportsInterface",
+                            "outputs": [
+                              {
+                                "internalType": "bool",
+                                "name": "",
+                                "type": "bool"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [],
+                            "name": "symbol",
+                            "outputs": [
+                              {
+                                "internalType": "string",
+                                "name": "",
+                                "type": "string"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "tokenURI",
+                            "outputs": [
+                              {
+                                "internalType": "string",
+                                "name": "",
+                                "type": "string"
+                              }
+                            ],
+                            "stateMutability": "view",
+                            "type": "function"
+                          },
+                          {
+                            "inputs": [
+                              {
+                                "internalType": "address",
+                                "name": "from",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "address",
+                                "name": "to",
+                                "type": "address"
+                              },
+                              {
+                                "internalType": "uint256",
+                                "name": "tokenId",
+                                "type": "uint256"
+                              }
+                            ],
+                            "name": "transferFrom",
+                            "outputs": [],
+                            "stateMutability": "nonpayable",
+                            "type": "function"
+                          }
+
+                        ];
+
+                        // スマートコントラクトに接続
+                        const contract = new ethers.Contract(contractAddress, contractABI, wallet);
+
+                        // スマートコントラクトの関数を呼び出し
+                        const tx = await contract.logLocation(location); // 例: logLocationという関数にlocationを送信
+                        await tx.wait();
+
+                        messageDiv.innerHTML = "Location sent to the contract successfully!";
+                    } catch (error) {
+                        console.error("Error sending location to contract:", error);
+                        messageDiv.innerHTML = "Error sending location to contract: " + error.message;
+                    }
+                }, function(error) {
+                    messageDiv.innerHTML = "Error getting location: " + error.message;
+                });
+            } else {
+                messageDiv.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        });
+    </script>
+</body>
+</html>
