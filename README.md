@@ -1,15 +1,11 @@
-# Sample Hardhat Project
+バレーボール試合観戦証明NFT
+概要
+このプロジェクトは、バレーボールの試合観戦を証明するNFTを発行するスマートコントラクトです。
+特定の試合会場に来場したファンに対して、位置情報を基にNFTをミントし、観戦の証明として記録します。
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
-
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
-```
-# NFT
-# NFT-
+機能
+指定した位置情報と入力された位置情報を比較し、一致すればNFTを発行
+NFTには、試合日時・会場情報を記録
+スマートコントラクトを通じて、ブロックチェーン上に永続的に記録
+環境構築
+このプロジェクトは Hardhat を使用して開発されています。
